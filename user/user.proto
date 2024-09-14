@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "./user/rpc" ;
+
+message GetAllUserResp {
+  int64 id = 1;
+}
+
+message GetAllUserReq {
+  int64 id = 1;
+  string Name = 2;
+  string Password =3;
+  string Email = 4;
+  int32 Phone = 5;
+}
+
+service UserService {
+  rpc GetAllUser(GetAllUserResp) returns (GetAllUserReq);
+}
