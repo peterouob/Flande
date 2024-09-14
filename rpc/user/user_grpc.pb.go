@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	UserService_GetAllUserRpc_FullMethodName = "/UserService/GetAllUserRpc"
 	UserService_CreateUserRpc_FullMethodName = "/UserService/CreateUserRpc"
+	UserService_LoginUserRpc_FullMethodName  = "/UserService/LoginUserRpc"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -29,6 +30,7 @@ const (
 type UserServiceClient interface {
 	GetAllUserRpc(ctx context.Context, in *GetAllUserReq, opts ...grpc.CallOption) (*GetAllUserResp, error)
 	CreateUserRpc(ctx context.Context, in *CreateUserReq, opts ...grpc.CallOption) (*CreateUserResp, error)
+	LoginUserRpc(ctx context.Context, in *LoginUserReq, opts ...grpc.CallOption) (*LoginUserResp, error)
 }
 
 type userServiceClient struct {
@@ -57,12 +59,22 @@ func (c *userServiceClient) CreateUserRpc(ctx context.Context, in *CreateUserReq
 	return out, nil
 }
 
+func (c *userServiceClient) LoginUserRpc(ctx context.Context, in *LoginUserReq, opts ...grpc.CallOption) (*LoginUserResp, error) {
+	out := new(LoginUserResp)
+	err := c.cc.Invoke(ctx, UserService_LoginUserRpc_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
 	GetAllUserRpc(context.Context, *GetAllUserReq) (*GetAllUserResp, error)
 	CreateUserRpc(context.Context, *CreateUserReq) (*CreateUserResp, error)
+	LoginUserRpc(context.Context, *LoginUserReq) (*LoginUserResp, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedUserServiceServer) GetAllUserRpc(context.Context, *GetAllUser
 }
 func (UnimplementedUserServiceServer) CreateUserRpc(context.Context, *CreateUserReq) (*CreateUserResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserRpc not implemented")
+}
+func (UnimplementedUserServiceServer) LoginUserRpc(context.Context, *LoginUserReq) (*LoginUserResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginUserRpc not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -125,6 +140,24 @@ func _UserService_CreateUserRpc_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_LoginUserRpc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginUserReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).LoginUserRpc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_LoginUserRpc_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).LoginUserRpc(ctx, req.(*LoginUserReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateUserRpc",
 			Handler:    _UserService_CreateUserRpc_Handler,
+		},
+		{
+			MethodName: "LoginUserRpc",
+			Handler:    _UserService_LoginUserRpc_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

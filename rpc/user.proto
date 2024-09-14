@@ -29,7 +29,17 @@ message CreateUserResp {
   string Name = 2;
 }
 
+message LoginUserReq {
+  string Name = 1;
+  string Password = 2;
+}
+
+message LoginUserResp {
+  string Name = 1;
+}
+
 service UserService {
   rpc GetAllUserRpc(GetAllUserReq) returns (GetAllUserResp);
   rpc CreateUserRpc(CreateUserReq) returns (CreateUserResp);
+  rpc LoginUserRpc (LoginUserReq) returns (LoginUserResp);
 }
