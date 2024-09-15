@@ -8,9 +8,8 @@ import (
 
 func main() {
 	s := rpc.Server{}
-	go func() {
-		s.StartCreateRpc()
-	}()
+
+	s.StartRpcService()
 	r := gin.Default()
 	router.InitRouter(r)
 	r.Run(":8082")
