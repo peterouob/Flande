@@ -6,5 +6,6 @@ import (
 )
 
 func InitRouter(r *gin.Engine) {
+	r.POST("/login", service.LoginUser)
 	r.POST("/create", service.CreateUser)
 }
