@@ -10,7 +10,7 @@ func main() {
 	s := rpc.Server{}
 
 	s.StartRpcService()
-	r := gin.Default()
+	r := gin.New()
 	router.InitRouter(r)
 	r.Run(":8082")
 }
