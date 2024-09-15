@@ -31,7 +31,7 @@ func init() {
 func RegisterEtcd(ctx context.Context, serverName, serverAddr string) error {
 	log.Println("Try to register etcd ...")
 	lease := eclient.NewLease(client)
-	cancelCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	cancelCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	leaseResp, err := lease.Grant(cancelCtx, 3)
 	if err != nil {
@@ -46,7 +46,7 @@ func RegisterEtcd(ctx context.Context, serverName, serverAddr string) error {
 		return err
 	}
 
-	cancelCtx, cancel = context.WithTimeout(ctx, 3*time.Second)
+	cancelCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	if err := em.AddEndpoint(cancelCtx, fmt.Sprintf("%s/%s/%s", Prefix, serverName, uuid.New().String()),
@@ -58,31 +58,26 @@ func RegisterEtcd(ctx context.Context, serverName, serverAddr string) error {
 	log.Println("Register etcd success")
 	del := func() {
 		log.Println("Register close")
-		cancelCtx, cancel = context.WithTimeout(ctx, 3*time.Second)
+		cancelCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 		em.DeleteEndpoint(cancelCtx, serverName)
 		lease.Close()
 	}
 
-	keepRegister(cancelCtx, leaseCancel, del, serverName, serverAddr)
-	return nil
-}
-
-func keepRegister(ctx context.Context, leaseChannel <-chan *eclient.LeaseKeepAliveResponse, cleanFunc func(), serviceName, addr string) {
 	go func() {
 		failedCount := 0
 		for {
 			select {
-			case resp := <-leaseChannel:
+			case resp := <-leaseCancel:
 				if resp != nil {
-					log.Println("keep alive success.")
+					//log.Println("keep alive success")
 				} else {
 					log.Println(resp)
-					log.Println("keep alive failed.")
+					log.Println("keep alive failed")
 					failedCount++
 					for failedCount > 3 {
-						cleanFunc()
-						if err := RegisterEtcd(ctx, serviceName, addr); err != nil {
+						del()
+						if err := RegisterEtcd(ctx, serverName, serverAddr); err != nil {
 							time.Sleep(time.Second)
 							continue
 						}
@@ -91,10 +86,12 @@ func keepRegister(ctx context.Context, leaseChannel <-chan *eclient.LeaseKeepAli
 					continue
 				}
 			case <-ctx.Done():
-				//cleanFunc()
-				//client.Close()
+				log.Println("context done, cleaning up...")
+				del()
+				client.Close()
 				return
 			}
 		}
 	}()
+	return nil
 }
