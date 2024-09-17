@@ -5,8 +5,9 @@ import (
 	"ecomm/etcd"
 	"ecomm/kafka/producer"
 	user2 "ecomm/protocol/user"
+	"fmt"
+	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	eclient "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
@@ -15,6 +16,7 @@ import (
 )
 
 func CreateUser(c *gin.Context) {
+
 	cli, err := eclient.NewFromURL(etcd.EtcdAddress)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -49,7 +51,13 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	req.Uid = int64(uuid.New().ID()) >> 27
+	node, err := snowflake.NewNode(1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	req.Uid = node.Generate().Int64()
 	conn, err := grpc.NewClient("etcd:///service/create", grpc.WithResolvers(builder), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -69,7 +77,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	err = producer.ProducerMessage(p, "user", "register user")
+	err = producer.ProducerMessage(Producer, "user", "register user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":          -1,
@@ -77,7 +85,7 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"resp": resp,
