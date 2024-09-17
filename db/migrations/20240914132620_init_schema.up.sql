@@ -3,7 +3,7 @@ CREATE database IF NOT EXISTS ecomm ;
 use ecomm;
 
 CREATE TABLE IF NOT EXISTS `users` (
-    uid int PRIMARY KEY NOT NULL ,
+    uid bigint PRIMARY KEY NOT NULL ,
     name varchar(255) NOT NULL ,
     password varchar(255) NOT NULL ,
     email varchar(255) NOT NULL ,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
 
 CREATE TABLE IF NOT EXISTS `product` (
     `id` int PRIMARY KEY NOT NULL  AUTO_INCREMENT,
-    `uid` int NOT NULL ,
+    `uid` bigint NOT NULL ,
     `name` varchar(255) NOT NULL ,
     `image` varchar(255) NOT NULL ,
     `category` varchar(255) NOT NULL ,
