@@ -1,5 +1,6 @@
 /.idea/
 /config/config.yaml/
 /default.etcd/
-/mq/data/kafka/
-/mq/data/zookeeper/
+/kafka/data/kafka/
+/kafka/data/zookeeper/
+/rabbitMQ/rabbitmq_data/

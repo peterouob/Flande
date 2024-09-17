@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"ecomm/etcd"
+	"ecomm/kafka/producer"
 	user2 "ecomm/protocol/user"
 	"github.com/gin-gonic/gin"
 	eclient "go.etcd.io/etcd/client/v3"
@@ -63,6 +64,14 @@ func LoginUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
 			"err:": err.Error(),
+		})
+		return
+	}
+	err = producer.ProducerMessage(p, "user", "login user id="+req.Name)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":          -1,
+			"producer err:": err.Error(),
 		})
 		return
 	}

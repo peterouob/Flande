@@ -1,2 +1,6 @@
 mysql:
   dsn:  root:password@tcp(127.0.0.1:3306)/ecomm?charset=utf8mb4&parseTime=True&loc=Local
+kafka:
+  server:
+    - localhost:9092
+  group: user

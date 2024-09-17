@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"ecomm/etcd"
+	"ecomm/kafka/producer"
 	user2 "ecomm/protocol/user"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -67,6 +68,16 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
+
+	err = producer.ProducerMessage(p, "user", "register user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":          -1,
+			"producer err:": err.Error(),
+		})
+		return
+	}
+	
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"resp": resp,
