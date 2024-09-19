@@ -1,9 +1,10 @@
 package main
 
 import (
+	"ecomm/db"
 	"ecomm/kafka/consumer"
 	"ecomm/router"
-	"ecomm/rpc"
+	"ecomm/rpc/user"
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
@@ -16,8 +17,8 @@ func main() {
 	wg.Add(1)
 
 	go consumer.StartConsumer("user", &wg)
-
-	s := rpc.Server{}
+	go db.ConnectMysql()
+	s := user.Server{}
 	s.StartRpcService()
 
 	r := gin.New()
