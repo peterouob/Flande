@@ -1,18 +1,24 @@
 package db
 
 import (
-	"database/sql"
 	"ecomm/config"
-	"fmt"
+	"errors"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
+	"log"
 )
 
-func ConnectMysql() *sql.DB {
+var DB *sqlx.DB
+
+func ConnectMysql() error {
+	var err error
 	dsn := config.Config.GetString("mysql.dsn")
-	db, err := sql.Open("mysql", dsn)
-	if err != nil || db.Ping() != nil {
-		fmt.Println(fmt.Errorf("connect to mysql have error %s", err.Error()))
-		return nil
+	DB, err = sqlx.Connect("mysql", dsn)
+	if err != nil {
+		return errors.New("connect DB failed err: " + err.Error())
 	}
-	return db
+	DB.SetMaxOpenConns(20)
+	DB.SetMaxIdleConns(10)
+	log.Println("connect mysql success ...")
+	return nil
 }
