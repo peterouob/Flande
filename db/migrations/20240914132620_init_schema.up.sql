@@ -3,12 +3,12 @@ CREATE database IF NOT EXISTS ecomm ;
 use ecomm;
 
 CREATE TABLE IF NOT EXISTS `users` (
-    uid bigint PRIMARY KEY NOT NULL ,
-    name varchar(255) NOT NULL ,
-    password varchar(255) NOT NULL ,
-    email varchar(255) NOT NULL ,
-    phone int NOT NULL ,
-    sex int2 NOT NULL
+    `uid` bigint PRIMARY KEY NOT NULL ,
+    `name` varchar(255) NOT NULL ,
+    `password` varchar(255) NOT NULL ,
+    `email` varchar(255) NOT NULL ,
+    `phone` int NOT NULL ,
+    `sex` int2 NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `orders` (
@@ -46,3 +46,11 @@ CREATE TABLE IF NOT EXISTS `order_item` (
 
 ALTER TABLE `order_item` ADD FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 ALTER TABLE `order_item` ADD FOREIGN KEY (`product_id`) REFERENCES `product` (`id`);
+
+CREATE TABLE IF NOT EXISTS `good` (
+    `id` bigint PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `price` int NOT NULL,
+    `created_at` datetime DEFAULT (now()),
+    `count` int NOT NULL
+);
