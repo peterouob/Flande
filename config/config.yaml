@@ -7,3 +7,9 @@ kafka:
 token:
   key : this_is_my_token_key
   rkey: this_is_my_refresh_token_key
+redis:
+  addr: 127.0.0.1:6379
+  db: 1
+  pass: ""
+server:
+  host: localhost

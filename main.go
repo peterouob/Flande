@@ -13,13 +13,11 @@ import (
 )
 
 func main() {
+	startService()
+
 	var wg sync.WaitGroup
 	wg.Add(1)
-
 	go consumer.StartConsumer("user", &wg)
-	go db.ConnectMysql()
-	s := user.Server{}
-	s.StartRpcService()
 
 	r := gin.New()
 	router.InitRouter(r)
@@ -29,8 +27,12 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 	log.Println("Server shutdown ...")
-
 	wg.Wait()
-	log.Println("Kafka consumers stopped ...")
-	log.Println("Server exiting !")
+}
+
+func startService() {
+	go db.ConnectMysql()
+	go db.ConnectRedis()
+	s := user.Server{}
+	s.StartRpcService()
 }
