@@ -2,18 +2,19 @@ package user
 
 import (
 	"context"
+	token2 "ecomm/db/dao/token"
 	"ecomm/db/dao/user"
 	"ecomm/etcd"
 	"ecomm/kafka/producer"
 	user2 "ecomm/protocol/user"
 	"ecomm/service"
+	"ecomm/token"
 	"github.com/gin-gonic/gin"
 	eclient "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
-	"time"
 )
 
 func LoginUser(c *gin.Context) {
@@ -77,19 +78,26 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	accessToken, _, err := service.Token.CreateToken(resp.Id, resp.Name, 15*time.Minute)
+	tk, err := token.CreateToken(resp.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":       -1,
-			"token err:": err.Error(),
+			"code":              -1,
+			"create token err:": err.Error(),
 		})
 		return
 	}
-
+	if err := token2.SaveTokenAuth(tk); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":            -1,
+			"save token err:": err.Error(),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"code":  0,
-		"msg:":  "login success",
-		"data":  resp,
-		"token": accessToken,
+		"code":   0,
+		"msg:":   "login success",
+		"data":   resp,
+		"token":  tk.AccessToken,
+		"rtoken": tk.RefreshToken,
 	})
 }
