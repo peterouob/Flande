@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "./rpc/user" ;
+option go_package = "./protocol/user" ;
 
 message GetAllUserReq {
   int64 id = 1;
@@ -35,7 +35,8 @@ message LoginUserReq {
 }
 
 message LoginUserResp {
-  string Name = 1;
+  int64  Id = 1;
+  string Name = 2;
 }
 
 service UserService {
