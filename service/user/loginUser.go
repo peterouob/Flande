@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
+	"time"
 )
 
 func LoginUser(c *gin.Context) {
@@ -59,7 +60,7 @@ func LoginUser(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	err = user.LoginUser(context.Background(), req)
+	resp, err := user.LoginUser(context.Background(), req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
@@ -67,7 +68,7 @@ func LoginUser(c *gin.Context) {
 		})
 		return
 	}
-	err = producer.ProducerMessage(service.Producer, "user", "login user id="+req.Name)
+	err = producer.ProducerMessage(service.Producer, "user", "login user name="+resp.Name)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":          -1,
@@ -75,8 +76,20 @@ func LoginUser(c *gin.Context) {
 		})
 		return
 	}
+
+	accessToken, _, err := service.Token.CreateToken(resp.Id, resp.Name, 15*time.Minute)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":       -1,
+			"token err:": err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg:": "login success",
+		"code":  0,
+		"msg:":  "login success",
+		"data":  resp,
+		"token": accessToken,
 	})
 }
