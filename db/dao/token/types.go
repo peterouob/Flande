@@ -1,14 +1,13 @@
 package token
 
 type Token struct {
-	AccessToken  string
-	RefreshToken string
-	AccessUUid   string
-	RefreshUUid  string
-	AtExp        int64
-	ReExp        int64
+	AccessToken string
+	AccessUUid  string
+	AtExp       int64
 }
-type AccessDetails struct {
-	AccessUid string
-	Userid    int64
+
+type RefreshToken struct {
+	RefreshToken string
+	RefreshUUid  string
+	ReExp        int64
 }

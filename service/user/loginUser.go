@@ -78,7 +78,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	tk, err := token.CreateToken(resp.Id)
+	tk, rtk, err := token.CreateToken(resp.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":              -1,
@@ -94,10 +94,10 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"code":   0,
-		"msg:":   "login success",
-		"data":   resp,
-		"token":  tk.AccessToken,
-		"rtoken": tk.RefreshToken,
+		"code":      0,
+		"msg:":      "login success",
+		"data":      resp,
+		"token_id":  tk.AccessUUid,
+		"rtoken_id": rtk.RefreshUUid,
 	})
 }

@@ -3,6 +3,7 @@ package token
 import (
 	"ecomm/config"
 	token2 "ecomm/db/dao/token"
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -11,45 +12,39 @@ import (
 )
 
 var err error
+var (
+	auuid chan interface{}
+	ruuid chan interface{}
+)
 
-func CreateToken(id int64) (*token2.Token, error) {
-	t := &token2.Token{}
-	t.AccessUUid = uuid.NewString()
-	t.RefreshUUid = uuid.NewString()
-	t.AtExp = time.Now().Add(time.Minute * 15).Unix()
-	t.ReExp = time.Now().Add(time.Hour * 24).Unix()
-	tokenVal := config.Config.GetString("token.key")
-	claim := jwt.MapClaims{}
-	claim["authorized"] = true
-	claim["access_uuid"] = t.AccessUUid
-	claim["user_id"] = id
-	claim["exp"] = t.AtExp
-	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	t.AccessToken, err = tk.SignedString([]byte(tokenVal))
-	if err != nil {
-		fmt.Println("sign token error: ", err)
-		return nil, err
-	}
-
-	rtokenVal := config.Config.GetString("token.rkey")
-	rclaim := jwt.MapClaims{}
-	rclaim["authorized"] = true
-	rclaim["refresh_uuid"] = t.RefreshUUid
-	rclaim["user_id"] = id
-	rclaim["exp"] = time.Now().Add(time.Minute * 15).Unix()
-	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	t.RefreshToken, err = rt.SignedString([]byte(rtokenVal))
-	if err != nil {
-		fmt.Println("sign token error: ", err)
-		return nil, err
-	}
-
-	go refreshTokenRoutine(t.RefreshToken, id, rtokenVal)
-
-	return t, nil
+func init() {
+	auuid = make(chan interface{}, 1024)
+	ruuid = make(chan interface{}, 1024)
 }
 
-func refreshTokenRoutine(refreshToken string, userId int64, refreshTokenSecret string) {
+func CreateToken(id int64) (*token2.Token, *token2.RefreshToken, error) {
+	tokenVal := config.Config.GetString("token.key")
+	rtokenVal := config.Config.GetString("token.rkey")
+	t, err := createToken(id, tokenVal)
+	if err != nil {
+		log.Println("Error int create token :" + err.Error())
+		return nil, nil, err
+	}
+	rt, err := createRefreshToken(id, rtokenVal)
+	if err != nil {
+		log.Println("Error int create refresh token :" + err.Error())
+		return nil, nil, err
+	}
+	go func() {
+		err := refreshTokenRoutine(rt.RefreshToken, id, rtokenVal)
+		if err != nil {
+			log.Println("error in refresh token routine :" + err.Error())
+		}
+	}()
+	return t, rt, nil
+}
+
+func refreshTokenRoutine(refreshToken string, userId int64, refreshTokenSecret string) error {
 	for {
 		token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -58,8 +53,7 @@ func refreshTokenRoutine(refreshToken string, userId int64, refreshTokenSecret s
 			return []byte(refreshTokenSecret), nil
 		})
 		if err != nil {
-			fmt.Println("error parsing refresh token:", err)
-			return
+			return errors.New("error parsing refresh token :" + err.Error())
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -68,23 +62,68 @@ func refreshTokenRoutine(refreshToken string, userId int64, refreshTokenSecret s
 			if sleepDuration > 0 {
 				time.Sleep(sleepDuration)
 			}
-			newToken, err := CreateToken(userId)
-			if err != nil {
-				fmt.Println("error creating new token:", err)
-				return
+			uid := <-auuid
+			rid := <-ruuid
+			if err := token2.DeleteOldToken(uid, rid); err != nil {
+				return err
 			}
-			refreshToken = newToken.RefreshToken
+			newToken, newRtoken, err := CreateToken(userId)
+			if err != nil {
+				return errors.New("create new token error:" + err.Error())
+			}
+			refreshToken = newRtoken.RefreshToken
 			log.Println("refresh token refreshed successfully")
 
 			saveErr := token2.SaveTokenAuth(newToken)
 			if saveErr != nil {
-				fmt.Println("error saving token to redis:", saveErr)
-				return
+				return errors.New("error save token error:" + err.Error())
 			}
 			log.Println("new tokens saved to redis successfully")
 		} else {
-			log.Println("invalid refresh token")
-			return
+			return errors.New("error parsing refresh token :" + err.Error())
 		}
 	}
+}
+func createToken(id int64, value string) (*token2.Token, error) {
+	t := &token2.Token{}
+	t.AccessUUid = uuid.NewString()
+	t.AtExp = time.Now().Add(time.Minute * 15).Unix()
+	claim := jwt.MapClaims{}
+	claim["authorized"] = true
+	claim["access_uuid"] = t.AccessUUid
+	claim["user_id"] = id
+	claim["exp"] = t.AtExp
+	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	t.AccessToken, err = tk.SignedString([]byte(value))
+	if err != nil {
+		fmt.Println("sign token error: ", err)
+		return nil, err
+	}
+	auuid <- claim["access_uuid"]
+	err := token2.SaveTokenAuth(t)
+	if err != nil {
+		return nil, errors.New("error in save token :" + err.Error())
+	}
+	return t, nil
+}
+func createRefreshToken(id int64, value string) (*token2.RefreshToken, error) {
+	t := &token2.RefreshToken{}
+	t.RefreshUUid = uuid.NewString()
+	t.ReExp = time.Now().Add(time.Hour * 24).Unix()
+	rclaim := jwt.MapClaims{}
+	rclaim["authorized"] = true
+	rclaim["refresh_uuid"] = t.RefreshUUid
+	rclaim["user_id"] = id
+	rclaim["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rclaim)
+	t.RefreshToken, err = rt.SignedString([]byte(value))
+	if err != nil {
+		return nil, errors.New("sign refresh token error:" + err.Error())
+	}
+	ruuid <- rclaim["refresh_uuid"]
+	err := token2.SaveRefreshToken(t)
+	if err != nil {
+		return nil, errors.New("error in save token :" + err.Error())
+	}
+	return t, nil
 }
