@@ -38,3 +38,12 @@ func DeleteOldToken(auuid, ruuid interface{}) error {
 	log.Println("Success delete old token set")
 	return nil
 }
+
+func GetValueById(uuid, ruuid interface{}) (string, string, error) {
+	if uuid.(string) == " " || ruuid.(string) == " " {
+		return "", "", errors.New("uuid and ruuid are empty")
+	}
+	uid := db.Rdb.Get(context.Background(), uuid.(string)).String()
+	rid := db.Rdb.Get(context.Background(), ruuid.(string)).String()
+	return uid, rid, nil
+}

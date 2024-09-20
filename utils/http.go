@@ -7,14 +7,6 @@ import (
 	"net/http"
 )
 
-func Forbidden(c *gin.Context, msg interface{}) {
-	c.JSON(http.StatusForbidden, gin.H{
-		"code": -1,
-		"msg":  msg,
-	})
-	c.Abort()
-}
-
 func SetCookie(c *gin.Context, name, value string) {
 	c.SetCookie(name, value, 365*3600, "/", config.Config.GetString("server.host"), false, true)
 }

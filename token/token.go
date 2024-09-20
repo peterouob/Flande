@@ -109,12 +109,12 @@ func createToken(id int64, value string) (*token2.Token, error) {
 func createRefreshToken(id int64, value string) (*token2.RefreshToken, error) {
 	t := &token2.RefreshToken{}
 	t.RefreshUUid = uuid.NewString()
-	t.ReExp = time.Now().Add(time.Hour * 24).Unix()
+	t.ReExp = time.Now().Add(time.Minute * 30).Unix()
 	rclaim := jwt.MapClaims{}
 	rclaim["authorized"] = true
 	rclaim["refresh_uuid"] = t.RefreshUUid
 	rclaim["user_id"] = id
-	rclaim["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	rclaim["exp"] = time.Now().Add(time.Minute * 30).Unix()
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rclaim)
 	t.RefreshToken, err = rt.SignedString([]byte(value))
 	if err != nil {
