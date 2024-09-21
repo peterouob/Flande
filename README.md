@@ -1,8 +1,8 @@
 - [x] ETCD to register more service 
 - [x] ETCD lease
-- [ ] kafka for user
-- [ ] double token for the refresh
-- [ ] Rewrite docker compose
+- [x] kafka for user
+- [x] double token for the refresh
+- [x] Rewrite docker compose
 - [ ] rabbit mq for shop
 - [ ] blockchain for transaction
 - [ ] websocket for chat and use mongo to save the chat message
