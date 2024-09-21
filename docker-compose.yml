@@ -3,15 +3,17 @@ services:
   zookeeper:
     image: zookeeper
     container_name: zookeeper
+    restart: always
     volumes:
-      - ./data/zookeeper:/data
+      - ./kafka/data/zookeeper:/data
   kafka:
     image: bitnami/kafka
     container_name: kafka
+    restart: always
     ports:
       - "9092:9092"
     volumes:
-      - ./data/kafka:/bitnami/kafka/data
+      - ./kafka/data/kafka:/bitnami/kafka/data
     environment:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
@@ -22,6 +24,7 @@ services:
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
+    restart: always
     ports:
       - "8080:8089"
     environment:
@@ -30,3 +33,25 @@ services:
       - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
     depends_on:
       - kafka
+  db:
+    container_name: mysql
+    image: mysql:8.4
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - "3306:3306"
+  redis:
+    container_name: redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitMQ/rabbitmq_data:/var/lib/rabbitmq
