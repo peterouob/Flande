@@ -94,10 +94,10 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"code":      0,
-		"msg:":      "login success",
-		"data":      resp,
-		"token_id":  tk.AccessUUid,
-		"rtoken_id": rtk.RefreshUUid,
+		"code":          0,
+		"msg:":          "login success",
+		"data":          resp,
+		"token":         tk,
+		"refresh_token": rtk,
 	})
 }
