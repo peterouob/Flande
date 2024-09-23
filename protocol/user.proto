@@ -2,12 +2,10 @@ syntax = "proto3";
 
 option go_package = "./protocol/user" ;
 
-message GetAllUserReq {
-  int64 id = 1;
-}
+message GetAllUserReq {}
 
 message GetAllUserResp {
-  int64 id = 1;
+  int64 Uid = 1;
   string Name = 2;
   string Password =3;
   string Email = 4;

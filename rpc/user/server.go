@@ -13,4 +13,5 @@ type Server struct {
 func (s *Server) StartRpcService() {
 	go s.StartCreateRpc()
 	go s.StartLoginRpc()
+	go s.StartGetAllUserRpc()
 }
