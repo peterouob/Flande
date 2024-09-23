@@ -3,7 +3,6 @@ mysql:
 kafka:
   server:
     - localhost:9092
-  group: user
 token:
   key : this_is_my_token_key
   rkey: this_is_my_refresh_token_key
