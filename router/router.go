@@ -13,4 +13,5 @@ func InitRouter(r *gin.Engine) {
 	r.Use(utils.Cors)
 	r.POST("/login", user.LoginUser)
 	r.POST("/create", user.CreateUser)
+	r.POST("/getAll", utils.AuthByJWT(), user.GetAllUser)
 }

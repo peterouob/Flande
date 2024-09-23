@@ -2,9 +2,11 @@ package utils
 
 import (
 	"ecomm/config"
+	"ecomm/token"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 func SetCookie(c *gin.Context, name, value string) {
@@ -28,4 +30,42 @@ func Cors(c *gin.Context) {
 		return
 	}
 	c.Next()
+}
+
+type auth struct {
+	id  interface{} `json:"id"`
+	rid interface{} `json:"rid"`
+}
+
+func AuthByJWT() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		authHeader := c.Request.Header.Get("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusForbidden, gin.H{
+				"code": "-1",
+				"msg:": "not have auth header",
+			})
+			return
+		}
+		parts := strings.SplitN(authHeader, " ", 2)
+		if !(len(parts) == 2 && parts[0] == "Bearer") {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": -1,
+				"msg":  "Format of Authorization is wrong",
+			})
+			c.Abort()
+			return
+		}
+		_, err := token.VerifyToken(parts[1])
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": -1,
+				"msg":  "Verify of Authorization is wrong",
+			})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+
 }

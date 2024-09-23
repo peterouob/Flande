@@ -43,7 +43,6 @@ func CreateToken(id int64) (*token2.Token, *token2.RefreshToken, error) {
 	}()
 	return t, rt, nil
 }
-
 func refreshTokenRoutine(refreshToken string, userId int64, refreshTokenSecret string) error {
 	for {
 		token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
@@ -126,4 +125,18 @@ func createRefreshToken(id int64, value string) (*token2.RefreshToken, error) {
 		return nil, errors.New("error in save token :" + err.Error())
 	}
 	return t, nil
+}
+
+// VerifyToken 檢查token簽名方法
+func VerifyToken(tokenString string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenString, func(tk *jwt.Token) (interface{}, error) {
+		if _, ok := tk.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected method: %v", tk.Header["alg"])
+		}
+		return []byte(config.Config.GetString("token.rkey")), nil
+	})
+	if err != nil {
+		return nil, errors.New("error in parse token")
+	}
+	return token, nil
 }
