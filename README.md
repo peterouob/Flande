@@ -19,11 +19,9 @@
 
 [//]: # (use web3 to do transaction)
 
----
 
-## Flande
+# Flande
 
---- 
 ## 簡介
 
 ### 一款快速配對的APP，登入以後可以查幹到他人的限時分享
