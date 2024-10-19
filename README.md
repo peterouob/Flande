@@ -24,7 +24,7 @@
 
 ## 簡介
 
-### 一款快速配對的APP，登入以後可以查幹到他人的限時分享
+### 一款快速配對的APP，登入以後可以查看到他人的限時分享
   - 上滑快速配對，下滑則再也不見！
   - 若是反悔，也可以使用每日的工具來讓他重新出現(但會出現在你意想不到的地方！)
 #### 拍出一段現實30's的影片或照片盡可能的吸引他人吧！
@@ -42,3 +42,21 @@
 
 ## 目前為實驗性專案
 
+## Backend port
+
+1. 8082 主入口
+2. 5050 登入
+3. 5051 註冊
+4. 5052 所有使用者
+
+## Docker
+```shell
+docker compose up -d 
+```
+
+## ISSUE規範
+- 前端：(front)_change:"pkg_line:msg"
+- 後端: (backend)_change:"pkg_line_msg"
+- App: (app)_change:"pkg_line_msg"
+- UI/UX: (ui/ux)_change:"pkg_line_msg"
+- Other: (other)_change:"pkg_line_msg"
