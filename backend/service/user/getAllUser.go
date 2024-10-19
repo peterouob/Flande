@@ -4,7 +4,6 @@ import (
 	"context"
 	"ecomm/db/dao/user"
 	"ecomm/kafka/producer"
-	user2 "ecomm/protocol/user"
 	"ecomm/service"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
@@ -31,8 +30,7 @@ func GetAllUser(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	req := user2.GetAllUserReq{}
-	resp, err := user.GetAllUser(context.Background(), req)
+	resp, err := user.GetAllUser(context.Background())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,

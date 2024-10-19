@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-func GetAllUser(ctx context.Context, req user2.GetAllUserReq) ([]user2.GetAllUserResp, error) {
+func GetAllUser(ctx context.Context) ([]user2.GetAllUserResp, error) {
 	var resp []user2.GetAllUserResp
 	query := "SELECT * FROM users"
 

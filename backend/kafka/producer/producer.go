@@ -17,7 +17,7 @@ func NewProducer() sarama.SyncProducer {
 }
 
 func ProducerMessage(producer sarama.SyncProducer, topic, message string) error {
-	producerMessage := &sarama.ProducerMessage{Topic: topic, Value: sarama.StringEncoder(message)}
+	producerMessage := &sarama.ProducerMessage{Topic: topic, Value: sarama.StringEncoder(message), Key: sarama.StringEncoder("uid")}
 	partition, offset, err := producer.SendMessage(producerMessage)
 	if err != nil {
 		return errors.New("failed to send message: " + err.Error())
