@@ -19,7 +19,7 @@
 
 [//]: # (use web3 to do transaction)
 
-
+<!-- 
 # Flande
 
 ## 簡介
@@ -38,7 +38,7 @@
 #### 遇到喜歡的人也可以將他放入我們專屬的膠囊區
   - 在限定的時間內等待你的來訪
 
----
+--- -->
 
 ## 目前為實驗性專案
 
@@ -53,10 +53,10 @@
 ```shell
 docker compose up -d 
 ```
-
+<!-- 
 ## ISSUE規範
 - 前端：(front)_change:"pkg_line:msg"
 - 後端: (backend)_change:"pkg_line_msg"
 - App: (app)_change:"pkg_line_msg"
 - UI/UX: (ui/ux)_change:"pkg_line_msg"
-- Other: (other)_change:"pkg_line_msg"
+- Other: (other)_change:"pkg_line_msg" -->
